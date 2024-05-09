@@ -1,8 +1,18 @@
+buildscript {
+    dependencies {
+        classpath("org.flywaydb:flyway-database-postgresql:10.12.0")
+    }
+}
+
 plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.2.5'
 	id 'io.spring.dependency-management' version '1.1.4'
+	id 'org.jooq.jooq-codegen-gradle' version '3.19.8'
+	id 'org.flywaydb.flyway' version '10.12.0'
 }
+
+
 
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
@@ -19,11 +29,41 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-jooq'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.flywaydb:flyway-core:10.12.0'
 	runtimeOnly 'org.postgresql:postgresql'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
+
+	jooqCodegen 'org.postgresql:postgresql'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+flyway {
+	url = "jdbc:postgresql:todo"
+	user = 'todo'
+	password = 'password'
+	schemas = ['public']
+	locations = ['classpath:db/migration']
+}
+
+jooq {
+	configuration {
+		jdbc {
+			driver = 'org.postgresql.Driver'
+			url = 'jdbc:postgresql:todo'
+			user = 'todo'
+			password = 'password'	
+		}
+
+		generator {
+			database {
+				name = 'org.jooq.meta.postgres.PostgresDatabase'
+				includes = '.*'
+				inputSchema = 'public'
+			}
+		}
+	}
 }
